@@ -100,7 +100,7 @@ ULONG SSDTfunction::GetReallySSDTFunctionAddress(ULONG index,ULONG _SSDT)
         pSection=(PIMAGE_SECTION_HEADER)((ULONG)pNtHead+sizeof(IMAGE_NT_HEADERS));
         for(i=0;i<NumberOfSection;i++)
         {
-                if ((SSDT_RVA>pSection.VirtualAddress) && (SSDT_RVA<(pSection.VirtualAddress+pSection.SizeOfRawData)))  //判断是否位于某个区块之简
+                if ((SSDT_RVA>pSection.VirtualAddress) && (SSDT_RVA<(pSection.VirtualAddress+pSection.SizeOfRawData)))  //判断是否位于某个区块之间
                 {
                         /*数据的文件偏移=(数据RVA - 节RVA) + 节的文件偏移
                         DbgPrint("RVA :%x   %d ",SSDT_RVA,i);

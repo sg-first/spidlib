@@ -241,7 +241,7 @@ BOOLEAN SSDThook::Add_Protect(PHOOK_INFO pinfo)
 }
 
 
-void SSDThook::Blue()//打击
+void SSDThook::Blue()
 {
  _asm
  {
@@ -263,7 +263,7 @@ void SSDThook::Thread_p_proc(PVOID a)
   status=KeWaitForSingleObject(&s_event,Executive,KernelMode,0,&my_interval);
   if(status == STATUS_TIMEOUT)//超时
   {
-    DbgPrint("线程超时！   蓝屏！！\n ");
+    DbgPrint("线程超时！蓝屏！\n ");
     Blue();
   }
  DbgPrint("KeResetEvent\n");

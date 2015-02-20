@@ -11,10 +11,10 @@ public :
   static NTSTATUS Hook(PHOOK_INFO info);//hook一个指定函数
   static ULONG IsHook(PHOOK_INFO info);//是否正在被hook
   static ULONG StartProtect(PHOOK_INFO info);//保护HOOK数据.参数：m=1开启HOOK防护,info第一个数据，返回值，返回状态，并填充info相关信息
-  static BOOLEAN Add_Protect(PHOOK_INFO pinfo);//添加hook到保护队列
+  static BOOLEAN Add_Protect(PHOOK_INFO pinfo);//添加HOOK到保护队列
+  static void Blue();//蓝屏
   
 private:
   static void Thread_proc(PVOID a);
-  static void Blue();
   static void Thread_p_proc(PVOID a);
 }
