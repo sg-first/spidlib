@@ -2,19 +2,19 @@
 #include "stru.h"
 
 #include<ntimage.h>
-#define SSDT_HOOK 1  //Ö±½ÓSSDT HOOK
-#define SSDT_CURR_HOOK 2//SSDT±íÖĞµ±Ç°º¯ÊıµÄ±©Á¦HOOK 
+#define SSDT_HOOK 1  //ç›´æ¥SSDT HOOK
+#define SSDT_CURR_HOOK 2//SSDTè¡¨ä¸­å½“å‰å‡½æ•°çš„æš´åŠ›HOOK 
 
 Protect_list head_Protect;
 BOOLEAN Start=FALSE;
-HANDLE handle_Protect;  //±£»¤Ïß³Ì¾ä±ú
+HANDLE handle_Protect;  //ä¿æŠ¤çº¿ç¨‹å¥æŸ„
 KEVENT s_event;
 ULONG Anti_HOOK = 0;
 void Thread_proc(PVOID a);
 void Thread_p_proc(PVOID a);
 void Blue();
 
-//¶ÔÓÚÕâÃ´Ò»¸öNativeAPI£¬ÎÒÃÇÊ¹ÓÃÇ°±ØĞëÉùÃ÷
+//å¯¹äºè¿™ä¹ˆä¸€ä¸ªNativeAPIï¼Œæˆ‘ä»¬ä½¿ç”¨å‰å¿…é¡»å£°æ˜
 NTSTATUS NTAPI ZwQuerySystemInformation(SYSTEM_INFORMATION_CLASS SystemInformationClass,PVOID SystemInformation,ULONG SystemInformationLength,PULONG ReturnLength);
 
 NTSTATUS Hook(PHOOK_INFO info)
@@ -22,7 +22,7 @@ NTSTATUS Hook(PHOOK_INFO info)
  NTSTATUS status = STATUS_UNSUCCESSFUL;
  _asm
  {
-    //¹Ø±ÕĞ´±£»¤
+    //å…³é—­å†™ä¿æŠ¤
     push eax
     cli
     mov eax, cr0
@@ -42,22 +42,22 @@ NTSTATUS Hook(PHOOK_INFO info)
      goto __exit;
    }
  }
- // Ñ¡Ä£Ê½
+ // é€‰æ¨¡å¼
  if(SSDTfunction::GetReallySSDTFunctionAddress(info->index,info->SSDT_TABLE)==SSDTfunction::Get_Current_Proc_address(info->index,info->SSDT_TABLE))
  {
- // µ±Ç°º¯ÊıºÍÔ­Ê¼º¯ÊıÏàÍ¬  Ö±½ÓSSDT-HOOK
+ // å½“å‰å‡½æ•°å’ŒåŸå§‹å‡½æ•°ç›¸åŒ  ç›´æ¥SSDT-HOOK
  ULONG indexs = info->index * 4;
  _asm
  {
    pushad
     mov ecx,info
     mov ebx,[ecx+HOOK_INFO.SSDT_TABLE]
-    mov ebx,[ebx]  // µÚÒ»ÕÅ±í
+    mov ebx,[ebx]  // ç¬¬ä¸€å¼ è¡¨
     mov eax,indexs
     add ebx,eax
-    mov eax,[ebx]  //±£´æÔ­À´µÄ
+    mov eax,[ebx]  //ä¿å­˜åŸæ¥çš„
     mov [ecx+HOOK_INFO.old_address],eax
-    // ½«HOOK_INFO.new_addressµØÖ·Ğ´Èë
+    // å°†HOOK_INFO.new_addressåœ°å€å†™å…¥
     mov eax,[ecx+HOOK_INFO.new_address]
     mov [ebx],eax
    popad
@@ -67,7 +67,7 @@ NTSTATUS Hook(PHOOK_INFO info)
  }
  else
  {
-   //Ìø×ªµØÖ·-µ±Ç°JMPËùÔÚµØÖ· -5£¨E9 + 32Î»µØÖ·£© [Ïà¶Ô]
+   //è·³è½¬åœ°å€-å½“å‰JMPæ‰€åœ¨åœ°å€ -5ï¼ˆE9 + 32ä½åœ°å€ï¼‰ [ç›¸å¯¹]
    ULONG indexs = info->index * 4;
    ULONG jmpaddr;
    jmpaddr = info->new_address - info ->old_address -5;
@@ -76,7 +76,7 @@ NTSTATUS Hook(PHOOK_INFO info)
      pushad
       mov ecx,info
       mov ebx,[ecx+HOOK_INFO.old_address]  //ebx
-      mov al,0xE9   //E9 jmp»úÆ÷Âë
+      mov al,0xE9   //E9 jmpæœºå™¨ç 
       mov byte PTR [ebx],al
       mov eax,jmpaddr
       mov [ebx+1],eax
@@ -88,7 +88,7 @@ NTSTATUS Hook(PHOOK_INFO info)
   status = STATUS_SUCCESS;
  }
  __exit:
- _asm //»Ö¸´Ğ´±£»¤
+ _asm //æ¢å¤å†™ä¿æŠ¤
  {
   push eax
   mov eax, cr0
@@ -123,7 +123,7 @@ ULONG IsHook(PHOOK_INFO info)
   PUCHAR now_data;
   ULONG *ssdt =  (PULONG)(*((PULONG)info->SSDT_TABLE));
   now_data =(PUCHAR) info->old_address;
-  if (ssdt[info->index]!=(ULONG)now_data)  //ÏÈÅĞ¶ÏµØÖ·ÊÇ·ñÏàÍ¬
+  if (ssdt[info->index]!=(ULONG)now_data)  //å…ˆåˆ¤æ–­åœ°å€æ˜¯å¦ç›¸åŒ
   {
    STATUS = 0;
    goto __exit;
@@ -149,391 +149,202 @@ ULONG IsHook(PHOOK_INFO info)
 
 ULONG StartProtect(PHOOK_INFO info)
 {
- /*º¯Êı¹¦ÄÜ£º±£»¤HOOKÊı¾İ
-  ²ÎÊı£º m=1¿ªÆôHOOK·À»¤ info µÚÒ»¸öÊı¾İ
-  ·µ»ØÖµ£º·µ»Ø×´Ì¬£¬²¢Ìî³äinfoÏà¹ØĞÅÏ¢*/
+ /*å‡½æ•°åŠŸèƒ½ï¼šä¿æŠ¤HOOKæ•°æ®
+  å‚æ•°ï¼š m=1å¼€å¯HOOKé˜²æŠ¤ info ç¬¬ä¸€ä¸ªæ•°æ®
+  è¿”å›å€¼ï¼šè¿”å›çŠ¶æ€ï¼Œå¹¶å¡«å……infoç›¸å…³ä¿¡æ¯*/
    NTSTATUS status;
-   head_Protect.Before=NULL; //³õÊ¼»¯Í·
+   head_Protect.Before=NULL; //åˆå§‹åŒ–å¤´
    head_Protect.Next=NULL;
    head_Protect.info=info;
-   DbgPrint("¶ÓÁĞ³õÊ¼»¯Íê±Ï£¡\n");
+   DbgPrint("é˜Ÿåˆ—åˆå§‹åŒ–å®Œæ¯•ï¼\n");
    Start=TRUE;
    status=PsCreateSystemThread(&handle_Protect,0,NULL,NULL,NULL,Thread_proc,NULL);
    if (!NT_SUCCESS(status))
    {
-
-    DbgPrint("±£»¤Ïß³Ì´´½¨Ê§°Ü£¡£¡£¡\n");
-
+    DbgPrint("ä¿æŠ¤çº¿ç¨‹åˆ›å»ºå¤±è´¥ï¼ï¼ï¼\n");
     return -1;
-
    }
-
+   
    ZwClose(handle_Protect);
-
    return 1;
-
- 
-
 }
 
-void Thread_proc(PVOID a) //Ïß³Ìº¯Êı
-
+void Thread_proc(PVOID a) //çº¿ç¨‹å‡½æ•°
 {
-
  ULONG MAX=4000;
-
  PProtect_list n=NULL,next=NULL;
-
  HANDLE hHandle;
-
- DbgPrint("±£»¤¶ÓÁĞ×¼±¸¾ÍĞ÷£¡£¡\n");
-
+ DbgPrint("ä¿æŠ¤é˜Ÿåˆ—å‡†å¤‡å°±ç»ªï¼ï¼\n");
  while(head_Protect.info==NULL)
-
- {
-
-  continue;
-
- }
-
+ {continue;}
  KeInitializeEvent(&s_event,SynchronizationEvent,FALSE);
-
  PsCreateSystemThread(&hHandle,0,NULL,NULL,NULL,Thread_p_proc,NULL);
-
  ZwClose(hHandle);
-
- while (TRUE)
-
+ while (1)
  {
-
   n=&head_Protect;
-
   next=n;
-
   while(next!=NULL)
-
   {
-
-   if(IsHook(next->info)==0)  //±»HOOK
-
+   if(IsHook(next->info)==0)  //è¢«HOOK
    {
-
-    //ÖØÌîHOOK
-
-    KeSetEvent(&s_event,0,TRUE);   // Í¨Öª
-
+    //é‡å¡«HOOK
+    KeSetEvent(&s_event,0,TRUE);   // é€šçŸ¥
     My_Sleep(200);
-
-    DbgPrint("Hook:±»·´HOOK£¡£¡\n");
-
+    DbgPrint("Hook:è¢«åHOOKï¼ï¼\n");
     next->info->old_address = SSDTfunction::Get_Current_Proc_address(next->info->index,next->info->SSDT_TABLE);
-
     Hook(next->info);
-
     Anti_HOOK++;
-
    }
-
    next=next->Next;
-
   }
 
-  if (Anti_HOOK>30)  //±»·´HOOK 30´Î ÈÌÎŞ¿ÉÈÌ£¬ÊµĞĞ´ò»÷
-
-  {
-
-   Blue();
-
-  }
-
+  if (Anti_HOOK>30)  //è¢«åHOOK 30æ¬¡ å¿æ— å¯å¿ï¼Œå®è¡Œæ‰“å‡»
+  {Blue();}
   My_Sleep(MAX);
-
-  KeSetEvent(&s_event,0,TRUE);   // Í¨Öª
-
+  KeSetEvent(&s_event,0,TRUE);   // é€šçŸ¥
  }
-
- DbgPrint("±£»¤Ïß³ÌÒÑ¾­¹Ø±Õ£¡£¡\n");
-
+ DbgPrint("ä¿æŠ¤çº¿ç¨‹å·²ç»å…³é—­ï¼ï¼\n");
  PsTerminateSystemThread(STATUS_SUCCESS);
-
 }
 
 BOOLEAN Add_Protect(PHOOK_INFO pinfo)
-
 {
-
  PProtect_list next;
-
- DbgPrint("Ìí¼Ó±£»¤¶ÓÁĞ£¡\n");
-
+ DbgPrint("æ·»åŠ ä¿æŠ¤é˜Ÿåˆ—ï¼\n");
  if (pinfo==NULL)
-
  {
-
   DbgPrint("PHOOK_INFO == NULL \n");
-
   return FALSE;
-
  }
-
  next=&head_Protect;
-
  while (next!=NULL)
-
  {
-
   if (next->Next==NULL)
-
   {
-
-   //ÕÒµ½¿Õ
-
+   //æ‰¾åˆ°ç©º
    PProtect_list n;
-
    n=(PProtect_list)ExAllocatePoolWithTag(NonPagedPool,sizeof(Protect_list),1447);
-
    if (n==NULL)
-
    {
-
-    DbgPrint("·ÖÅä¶ÓÁĞÊ§°Ü\n");
-
+    DbgPrint("åˆ†é…é˜Ÿåˆ—å¤±è´¥\n");
     return FALSE;
-
    }
-
    n->info=pinfo;
-
    n->Before=next;
-
    n->Next=NULL;
-
    next->Next=n;
-
-   DbgPrint("¼ÓÈë¶ÓÁĞ³É¹¦£¡\n");
-
+   DbgPrint("åŠ å…¥é˜Ÿåˆ—æˆåŠŸï¼\n");
    return TRUE;
-
   }
-
-  next=next->Next;  //ÏÂÒ»¸ö±í
-
+  next=next->Next;  //ä¸‹ä¸€ä¸ªè¡¨
  }
-
- DbgPrint("¶ÓÁĞÓĞ´íÎó£¡\n");
-
+ DbgPrint("é˜Ÿåˆ—æœ‰é”™è¯¯ï¼\n");
  return FALSE;
-
 }
-
-  
-
  SSDT_RVA = MemorySSDT-ntkrnlpaBase;
-
  if (SSDT_RVA==0)
-
  {
-
-  DbgPrint("SSDT RVAÎ´È¡µ½£¡\n");
-
+  DbgPrint("SSDT RVAæœªå–åˆ°ï¼\n");
   return STATUS_UNSUCCESSFUL;
-
  }
-
  //DbgPrint("SSDT RVA:%x",SSDT_RVA);
-
  __asm
-
  {
-
   pushad
-
    _emit 0x0f
-
    _emit 0x20
-
    _emit 0xe0    //mov eax,cr4
-
    shr eax,4
-
    and eax,1
-
    mov ssa,eax
-
    popad
-
  }
-
  kernelName = ssa?L"\\SystemRoot\\system32\\ntkrnlpa.exe" : L"\\SystemRoot\\system32\\ntoskrnl.exe";
-
  RtlInitUnicodeString(&FileName,kernelName);
-
  InitializeObjectAttributes(&fileInfo,&FileName,OBJ_CASE_INSENSITIVE,NULL,NULL);
-
  status=ZwCreateFile(&handle,GENERIC_READ,&fileInfo,&ioStatus,NULL,FILE_ATTRIBUTE_NORMAL,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,FILE_SYNCHRONOUS_IO_NONALERT,NULL,0);
-
  if (ioStatus.Information!=1)
-
  {
-
-  DbgPrint("ÎÄ¼ş´ò¿ªÊ§°Ü£¡\n");
-
+  DbgPrint("æ–‡ä»¶æ‰“å¼€å¤±è´¥ï¼\n");
   return STATUS_UNSUCCESSFUL;
-
  }
-
  ZwQueryInformationFile(handle,&ioStatus,&fsi,sizeof(FILE_STANDARD_INFORMATION),FileStandardInformation);
-
  if ((LONG)fsi.EndOfFile.QuadPart==0)
-
  {
-
-  DbgPrint("»ñÈ¡ÎÄ¼ş´óĞ¡Ê§°Ü£¡\n");
-
+  DbgPrint("è·å–æ–‡ä»¶å¤§å°å¤±è´¥ï¼\n");
   return STATUS_UNSUCCESSFUL;
-
  }
-
  pFileBuff=(unsigned char *)ExAllocatePoolWithTag(NonPagedPool,(size_t)fsi.EndOfFile.QuadPart,1449);
-
  if (pFileBuff==NULL)
-
  {
-
-  DbgPrint("ÎªÎÄ¼ş·ÖÅä»º³åÇøÊ§°Ü£¡£¡\n");
-
+  DbgPrint("ä¸ºæ–‡ä»¶åˆ†é…ç¼“å†²åŒºå¤±è´¥ï¼ï¼\n");
   return STATUS_UNSUCCESSFUL;
-
  }
-
  ZwReadFile(handle,NULL,NULL,NULL,&ioStatus,pFileBuff,(size_t)fsi.EndOfFile.QuadPart,0,NULL);
-
  pDosHead=(PIMAGE_DOS_HEADER)pFileBuff;
-
  pNtHead=(PIMAGE_NT_HEADERS)((ULONG)pDosHead+(ULONG)(pDosHead->e_lfanew));
-
  NumberOfSection=pNtHead->FileHeader.NumberOfSections;
-
  pSection=(PIMAGE_SECTION_HEADER)((ULONG)pNtHead+sizeof(IMAGE_NT_HEADERS));
-
  for(i=0;i<NumberOfSection;i++)
-
  {
-
-  if ((SSDT_RVA>pSection[i].VirtualAddress) && (SSDT_RVA<(pSection[i].VirtualAddress+pSection[i].SizeOfRawData)))  //ÅĞ¶ÏÊÇ·ñÎ»ÓÚÄ³¸öÇø¿éÖ®¼ò
-
+  if ((SSDT_RVA>pSection[i].VirtualAddress) && (SSDT_RVA<(pSection[i].VirtualAddress+pSection[i].SizeOfRawData)))  //åˆ¤æ–­æ˜¯å¦ä½äºæŸä¸ªåŒºå—ä¹‹ç®€
   {
-
-   //Êı¾İµÄÎÄ¼şÆ«ÒÆ=(Êı¾İRVA - ½ÚRVA) + ½ÚµÄÎÄ¼şÆ«ÒÆ
-
+   //æ•°æ®çš„æ–‡ä»¶åç§»=(æ•°æ®RVA - èŠ‚RVA) + èŠ‚çš„æ–‡ä»¶åç§»
    //DbgPrint("RVA :%x   %d ",SSDT_RVA,i);
-
    //DbgPrint("RVA %d",pSection[i].VirtualAddress);
-
    addr2=SSDT_RVA-pSection[i].VirtualAddress;
-
    addr1=addr2+pSection[i].PointerToRawData;
-
    break;
-
   }
-
  }
-
  //DbgPrint("File Offset:%x",addr1);
-
  ret_address=addr1+index*4;
-
  _asm
-
  {
-
   pushad
-
    mov ecx,pFileBuff
-
    mov ebx,ret_address
-
    mov eax,[ebx+ecx]
-
    mov ret_address,eax 
-
   popad
-
  }
-
- // ÖØ¶¨Î»
-
+ // é‡å®šä½
  ret_address-=pNtHead->OptionalHeader.ImageBase;
-
  ret_address+=ntkrnlpaBase;
-
- //ÊÍ·Å×ÊÔ´
-
+ //é‡Šæ”¾èµ„æº
  ExFreePool(pFileBuff);
-
  ExFreePool(buf);
-
  ZwClose(handle);
-
 return ret_address;
-
 }
 
 void Blue()
-
 {
-
  _asm
-
  {
-
   mov eax,0;
-
   mov [eax],100;
-
  }
-
-  
-
 }
 
-void Thread_p_proc(PVOID a)  //Ë«Ïß³Ì±£»¤
-
+void Thread_p_proc(PVOID a)  //åŒçº¿ç¨‹ä¿æŠ¤
 {
-
  LARGE_INTEGER my_interval;
-
  NTSTATUS status;
-
  my_interval.QuadPart=DELAY_ONE_MILLISECOND; //DELAY_ONE_MILLISECOND=(-10)*1000
-
- my_interval.QuadPart*=5000;  //4500 //ºÁÃë
-
+ my_interval.QuadPart*=5000;  //4500 //æ¯«ç§’
  while(TRUE)
-
  {
-
   DbgPrint("Whlie \n");
-
  status=KeWaitForSingleObject(&s_event,Executive,KernelMode,0,&my_interval);
-
-if (status == STATUS_TIMEOUT)  //³¬Ê±
-
+if (status == STATUS_TIMEOUT)  //è¶…æ—¶
  {
-
-  DbgPrint("Ïß³Ì³¬Ê±£¡   À¶ÆÁ£¡£¡\n ");
-
+  DbgPrint("çº¿ç¨‹è¶…æ—¶ï¼   è“å±ï¼ï¼\n ");
   Blue();
-
  }
-
  DbgPrint("KeResetEvent\n");
-
  KeResetEvent(&s_event);
-
  }
-
  return;
-
 }
