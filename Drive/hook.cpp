@@ -161,7 +161,7 @@ ULONG StartProtect(PHOOK_INFO info)
    status=PsCreateSystemThread(&handle_Protect,0,NULL,NULL,NULL,Thread_proc,NULL);
    if (!NT_SUCCESS(status))
    {
-    DbgPrint("保护线程创建失败！！！\n");
+    DbgPrint("保护线程创建失败！\n");
     return -1;
    }
    

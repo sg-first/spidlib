@@ -1,6 +1,7 @@
 spidlib
 ===================================
 This is a Windows library written by SpiderKing.
+
 Ordinary
 -----------------------------------
 The Ordinary library is a part of the spidlib about application layer.
@@ -12,6 +13,11 @@ Easy is a component written by a nerd. It encapsulates the some windows¡¯s basic
 This component encapsulates network communication, program through this component acts as a server or client, without too much optimization.
 ### HookRegistration
 This component using the behavior that crack often skips system API, It¡¯s a software registration mechanism that implemented by hooking API.
+### ProcessInvasion
+A hybrid library including some bottom operation, currently only one HOOK IAT function.
+### AsynchronousIO
+A simple asynchronous non blocking IO implementation.
+
 Drive
 -----------------------------------
 The Ordinary library is a part of the spidlib about driver stage.
