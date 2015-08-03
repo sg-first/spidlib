@@ -17,6 +17,8 @@ This component using the behavior that crack often skips system API, It¡¯s a sof
 A hybrid library including some bottom operation, currently only one HOOK IAT function.
 ### AsynchronousIO
 A simple asynchronous non blocking IO implementation.
+### SmcBlockEncryption
+A library that use boolean operations to encryption code block. Mainly used in anti-debuging.
 
 Drive
 -----------------------------------
