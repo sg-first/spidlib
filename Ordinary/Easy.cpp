@@ -78,7 +78,7 @@ int easy::FolderEmpty(const char* path)
             }
             else
             {
-                //ÓĞ×ÓÎÄ¼ş¼ĞÒ²Ëã·Ç¿Õ
+                //æœ‰å­æ–‡ä»¶å¤¹ä¹Ÿç®—éç©º
                 EmptyDirectory = FALSE;
                 break;
             }
@@ -105,7 +105,7 @@ string easy::GetDocumentsPath()
     char   szDocument[MAX_PATH]={0};   
     memset(m_lpszDefaultDir,0,_MAX_PATH); 
     LPITEMIDLIST pidl=NULL;   
-    SHGetSpecialFolderLocation(NULL, CSIDL_PERSONAL,&pidl);//µÚ¶ş¸ö²ÎÊıÎª´ú±íÎÒµÄÎÄµµµÄºê£¬»»×öÆäËüºêÒ²¿ÉÒÔ²éÕÒÆäËüÏµÍ³ÎÄ¼ş¼Ğ
+    SHGetSpecialFolderLocation(NULL, CSIDL_PERSONAL,&pidl);//ç¬¬äºŒä¸ªå‚æ•°ä¸ºä»£è¡¨æˆ‘çš„æ–‡æ¡£çš„å®ï¼Œæ¢åšå…¶å®ƒå®ä¹Ÿå¯ä»¥æŸ¥æ‰¾å…¶å®ƒç³»ç»Ÿæ–‡ä»¶å¤¹
     if   (pidl   &&   SHGetPathFromIDList(pidl,   szDocument))   
     {   
         GetShortPathName(szDocument,m_lpszDefaultDir,_MAX_PATH);   
@@ -176,3 +176,46 @@ return op;
 	 _mkdir(name);
  }
 
+char** easy::EnumFiles(const char *directory, int *count)
+{
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFind;
+	char result[MAX_RESULT][MAX_PATH];
+	char **returnresult;
+	char pattern[MAX_PATH];
+	int i = 0, j;
+	// å¼€å§‹æŸ¥æ‰¾
+	strcpy(pattern, directory);
+	strcat(pattern, "\\*.*");
+	hFind = FindFirstFile(pattern, &FindFileData);
+	if (hFind == INVALID_HANDLE_VALUE)
+	{
+		*count = 0;
+		return NULL;
+	}
+	else
+	{
+		do
+		{strcpy(result[i++], FindFileData.cFileName);}
+		while(FindNextFile(hFind, &FindFileData) != 0);
+	}
+	// æŸ¥æ‰¾ç»“æŸ
+	FindClose(hFind);
+	// å¤åˆ¶åˆ°ç»“æœä¸­
+	returnresult = (char **)calloc(i, sizeof(char *));
+	for(j = 0; j < i; j++)
+	{
+		returnresult[j] = (char *)calloc(MAX_PATH, sizeof(char));
+		strcpy(returnresult[j], result[j]);
+	}
+	*count = i;
+	return returnresult;
+}
+/*è°ƒç”¨çš„ä»£ç ï¼š
+	int count;
+	char **result = EnumFiles(è¦æŸ¥æ‰¾çš„ç›®å½•, &count);
+	for (int i=0;i<count;i++)
+	{
+		//result[i]ä¸ºæ¯æ¬¡å¾ªç¯åˆ°çš„æ–‡ä»¶å
+	}
+*/
