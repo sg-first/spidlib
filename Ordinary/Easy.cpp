@@ -22,20 +22,22 @@ bool easy::FileExists(const char* name)
 	{return true;}
 }
 
-void easy::WriteFile(const char* name,const char* text)
+void easy::WriteFile(string name,string text)
 {
-	fstream file(name);
-    file<<text;	
+    fstream file(name.c_str());
+    file<<text.c_str();
     file.close();
 }
 
-string easy::ReadFile(const char* name)
+string easy::ReadFile(string name)
 {
-	string op;
-    fstream file(name);
-    file>>op;	
-    file.close();
-	return op;
+    ifstream infile(name);//用来打开文件
+    string word="";//全部的
+    string tmp;//在读的当前行
+    while(getline(infile,tmp))
+    {word+=tmp+"\n";}
+    word=word.substr(0,word.length()-2);//删除最后的换行
+    return word;
 }
 
 void easy::OpenProgram(LPCSTR name,LPSTR caner)
@@ -153,7 +155,8 @@ return op;
 
  int easy::RandNumber(int fanwei)
  {
-	 return rand()%fanwei;
+	srand((unsigned)time(NULL));
+	return rand()%fanwei;
  }
 
  HWND easy::FindWindow(const char* windowclass,const char*title)
