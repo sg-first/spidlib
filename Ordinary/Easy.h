@@ -18,8 +18,8 @@ class easy
 public:
 	static void RenameFile(const char* name,const char* newname);//重命名文件，参数1为原文件路径，参数2为文件路径+新名字，无返回值
 	static bool FileExists(const char* name);//检测文件是否存在，参数1为文件路径，存在返回真，反之则假
-	static void WriteFile(const char* name,const char* text);//写文本文件，参数1为文件路径，参数2为写入内容，无返回值
-	static string ReadFile(const char* name);//读文本文件，参数1为文件路径，返回文件内容
+	static void WriteFile(string name,string text);//写文本文件，参数1为文件路径，参数2为写入内容，无返回值
+	static string ReadFile(string name);//读文本文件，参数1为文件路径，返回文件内容
 	static void OpenProgram(LPCSTR name,LPSTR caner=NULL);//打开程序，参数1为程序路径，无返回值
 	static void CreateFile(const char* name);//创建文件，参数1为要创建的文件路径，无返回值
 	static void CreateDirectory(const char* name);//创建路径，参数1为要创建的路径路径，无返回值
