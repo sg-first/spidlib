@@ -118,22 +118,18 @@ string easy::GetDocumentsPath()
 
 string easy::GetProgramPath()
 {
-TCHAR _szPath[MAX_PATH + 1]={0};
-GetModuleFileName(NULL, _szPath, MAX_PATH);
-(_tcsrchr(_szPath, _T('\\')))[1] = 0;
-string strPath;
-for (int n=0;_szPath[n];n++)
-{
-if (_szPath[n]!=_T('\\'))
-{
-   strPath +=_szPath[n] ;
-}
-else
-{
-   strPath += _T("\\");
-}
-}
-return strPath;
+	TCHAR _szPath[MAX_PATH + 1]={0};
+	GetModuleFileName(NULL, _szPath, MAX_PATH);
+	(_tcsrchr(_szPath, _T('\\')))[1] = 0;
+	string strPath;
+	for (int n=0;_szPath[n];n++)
+	{
+		if (_szPath[n]!=_T('\\'))
+		{strPath +=_szPath[n] ;}
+		else
+		{strPath += _T("\\");}
+	}
+	return strPath;
 }
 
 void easy::WriteINI(const char* ziduan,const char* vim,const char* val,const char* name)
