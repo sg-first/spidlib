@@ -11,8 +11,8 @@ public :
   HookRegistration(char *failure,char *success,int trelkey);//初始化类，HOOK MessageBoxA函数
   void registration(int key,string fail,string title);//用户注册时调用的函数
   virtual void successRegistration();//注册成功时调用的函数
-  virtual void failRegistration();//注册失败时调用的函数
-  virtual void hookError();//hook失败调用的函数
+  virtual void failRegistration(){}//注册失败时调用的函数
+  virtual void hookError(){}//hook失败调用的函数
 
   
 private:
