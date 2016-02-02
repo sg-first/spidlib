@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "AVIVideo.h"
+#include "ImageToAVI.h"
 
 inline WORD PaletteSize(WORD color)
 {
